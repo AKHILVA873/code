@@ -27,21 +27,23 @@ try:
                 # Extract devicestatus and convert it directly to a float
                 devicestatus = float(response_data.get('devicestatus', 0))
                 
-                print(f"[{datetime.now()}] Numeric devicestatus received: {devicestatus}")
+                # print(f"[{datetime.now()}] Numeric devicestatus received: {devicestatus}")
 
                 # Write the float value to shared memory
                 write_data_to_shared_memory("command_from_server", devicestatus)
             
             elif response.status_code == 204:
                 # No job available, set command to 0.0
-                print(f"[{datetime.now()}] No job available")
+                # print(f"[{datetime.now()}] No job available")
                 write_data_to_shared_memory("command_from_server", 1000.0)
             else:
-                print(f"[{datetime.now()}] Failed to call API. Status Code: {response.status_code}")
-                print(f"Response: {response.text}")
+                # print(f"[{datetime.now()}] Failed to call API. Status Code: {response.status_code}")
+                # print(f"Response: {response.text}")
+                dummy =1
         
         except requests.exceptions.RequestException as e:
-            print(f"[{datetime.now()}] API request error: {e}")
+            # print(f"[{datetime.now()}] API request error: {e}")
+            dummy =1
         
         # Wait for 5 seconds before the next request
         time.sleep(5)

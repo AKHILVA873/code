@@ -351,7 +351,6 @@ def door_control_procedure():
             except Exception as e:
                 dummy =1
             
-            time.sleep(1)  # Adjust the delay as needed
 
 
 
@@ -368,10 +367,9 @@ def door_control_procedure():
             except Exception as e:
                 dummy =1
             
-            time.sleep(1)  # Adjust the delay as needed
 
         else:
-            dummy =1
+            time.sleep(4)  # Adjust the delay as needed
 
 
 
