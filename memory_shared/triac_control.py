@@ -36,6 +36,7 @@ def monitor_triac_delay():
         with triac_delay_lock:
             if triac_delay != new_triac_delay:
                 triac_delay = new_triac_delay
+                print(f"Updated TRIAC delay: {triac_delay}")
                 triac_delay_updated.set()
         time.sleep(0.1)  # Adjust the delay as needed
 

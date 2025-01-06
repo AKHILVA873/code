@@ -28,71 +28,71 @@ pi.write(drain, pigpio.LOW)
 pi.write(door, pigpio.LOW)
 
 def chCommand():
+    print("clockwise High command received")
     pi.write(relayPin1, pigpio.LOW)
     pi.write(relayPin2, pigpio.LOW)
     pi.write(relayPin3, pigpio.LOW)
     pi.write(relayPin0, pigpio.HIGH)
 
 def clCommand():
+    print("clockwise Low command received")
     pi.write(relayPin1, pigpio.HIGH)
     pi.write(relayPin2, pigpio.LOW)
     pi.write(relayPin3, pigpio.LOW)
     pi.write(relayPin0, pigpio.HIGH)
 
 def ahCommand():
+    print("Anticlock High command received")
     pi.write(relayPin1, pigpio.LOW)
     pi.write(relayPin2, pigpio.HIGH)
     pi.write(relayPin3, pigpio.HIGH)
     pi.write(relayPin0, pigpio.HIGH)
 
 def alCommand():
+    print("Anticlock Low command received")
     pi.write(relayPin1, pigpio.HIGH)
     pi.write(relayPin2, pigpio.HIGH)
     pi.write(relayPin3, pigpio.HIGH)
     pi.write(relayPin0, pigpio.HIGH)
 
 def stCommand():
+    print("stop command received")
     pi.write(relayPin0, pigpio.LOW)
 
 def inlet2HCommand():
+    print("inlet valve 2 open")
     pi.write(inlet2, pigpio.HIGH)
 
 def inlet2LCommand():
+    print("inlet valve 2 close")
     pi.write(inlet2, pigpio.LOW)
 
 def inlet1HCommand():
+    print("inlet valve 1 open")
     pi.write(inlet1, pigpio.HIGH)
 
 def inlet1LCommand():
+    print("inlet valve 1 close")
     pi.write(inlet1, pigpio.LOW)
 
 def drainHCommand():
+    print("drain pump on")
     pi.write(drain, pigpio.HIGH)
 
 def drainLCommand():
+    print("drain pump off")
     pi.write(drain, pigpio.LOW)
 
 def doorHCommand():
+    print("door pulse activated")
     pi.write(door, pigpio.HIGH)
     time.sleep(0.1)
     pi.write(door, pigpio.LOW)
     write_data_to_shared_memory("relay_command", float(13.0))
 
 def doorLCommand():
+    print("door closed")
     pi.write(door, pigpio.LOW)
-
-def exit_handler():
-    """Set all relay pins to HIGH state on exit."""
-    pi.write(relayPin0, pigpio.LOW)
-    pi.write(relayPin1, pigpio.LOW)
-    pi.write(relayPin2, pigpio.LOW)
-    pi.write(relayPin3, pigpio.LOW)
-    pi.write(inlet2, pigpio.LOW)
-    pi.write(inlet1, pigpio.LOW)
-    pi.write(drain, pigpio.LOW)
-    pi.write(door, pigpio.LOW)
-    write_data_to_shared_memory("relay_command", float(0.0))
-
 
 if __name__ == "__main__":
     command_map = {
@@ -108,8 +108,7 @@ if __name__ == "__main__":
         10.0: drainHCommand,
         11.0: drainLCommand,
         12.0: doorHCommand,
-        13.0: doorLCommand,
-        14.0: exit_handler,
+        13.0: doorLCommand
     }
 
     try:
@@ -121,9 +120,8 @@ if __name__ == "__main__":
             else:
                 print(f"Unknown command value received: {command_value}")
 
-            time.sleep(1)  # Adjust delay as needed
+            time.sleep(0.5)  # Adjust delay as needed
     except KeyboardInterrupt:
-        print("Program terminated by user.")
+        print("Program terminated")
     finally:
-        exit_handler()
         pi.stop()

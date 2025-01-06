@@ -40,8 +40,17 @@ def update_ready(hubid, deviceid):
     try:
         # Make a POST request to the API
         response = requests.post(url, json=data)
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            print("Success: Ready status updated successfully.")
+        else:
+            print("Error: Server disconnected or failed to respond.")
+            print(f"Status Code: {response.status_code}")
+            print(f"Response: {response.text}")
+
     except Exception as e:
-        dummy =1
+        print(f"An error occurred: {e}")
 
 
 
@@ -60,8 +69,17 @@ def update_progress(hubid, deviceid, progress):
     try:
         # Make a POST request to the API
         response = requests.post(url, json=data)
+
+        # Check if the request was successful
+        if response.status_code == 200:
+            print("Success: Progress updated successfully.")
+        else:
+            print("Error: Server disconnected or failed to respond.")
+            print(f"Status Code: {response.status_code}")
+            print(f"Response: {response.text}")
+
     except Exception as e:
-        dummy =1
+        print(f"An error occurred: {e}")
 
 
 
@@ -76,10 +94,10 @@ def read_shared_memory():
             taccosensor = read_data_from_shared_memory("taccosensor")
             water_level = read_data_from_shared_memory("Pressure")
             command = read_data_from_shared_memory("command_from_server")
-            dummy =1
+            print("command",command)            # taccosensor = read_data_from_shared_memory("taccosensor")
             # taccosensor = read_data_from_shared_memory("taccosensor")
         except Exception as e:
-            dummy =1
+            print(f"Error reading shared memory: {e}")
         time.sleep(1)  # Adjust the delay as needed
 
 
@@ -134,7 +152,7 @@ def check_and_load_water(target_level):
 def send_rpm(rpm_input):
     triac_delay = float(rpm_input)
     write_data_to_shared_memory("triac_delay", triac_delay)
-    dummy =1
+    print("sended new rpm")
 
 def rpm_leveler(required_rpm):
     global door_status, triac_delay, taccosensor, water_level
@@ -145,6 +163,7 @@ def rpm_leveler(required_rpm):
         elif((required_rpm-taccosensor)<=-10):
             req_rpm_input=req_rpm_input+30
         else:
+            print("rpm leveling done at triac delay:",req_rpm_input)
             break
         send_rpm(req_rpm_input)
         time.sleep(1)
@@ -154,19 +173,19 @@ def stop_spin():
     write_data_to_shared_memory("relay_command", 5.0)
     time.sleep(5)  
     send_rpm(8000)
-    dummy =1
+    print("stopped")
 
 
 def set_cl_direction():
     write_data_to_shared_memory("relay_command", 1.0)
     time.sleep(1)
-    dummy =1
+    print("cl set")
 
 
 def set_al_direction():
     write_data_to_shared_memory("relay_command", 3.0)
     time.sleep(1)
-    dummy =1
+    print("al set")
 
 
 def drum_rotation_pattern_one():
@@ -182,7 +201,7 @@ def drum_rotation_pattern_one():
         rpm_leveler(30)
         time.sleep(15)
         stop_spin()
-    dummy =1
+    print("drum rotation pattern one completed")
 
 
 
@@ -200,7 +219,7 @@ def drum_rotation_pattern_two():
         rpm_leveler(40)
         time.sleep(15)
         stop_spin()
-    dummy =1
+    print("drum rotation pattern two completed")
 
 
 def cycle_end():
@@ -215,12 +234,14 @@ def door_control_procedure():
         if command <=0.0:
             try:
                 time.sleep(10)
+                print("door locking initiated.")
                 close_door()
+                print("Door closed.")
                 # Example usage
                 update_progress("17348502838715973", 1000, "05")
                 write_data_to_shared_memory("command_from_server", 05.0)
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure [ 0 - 5 ]: {e}")
             
 
 
@@ -228,6 +249,9 @@ def door_control_procedure():
         elif command <=5.0:
             try:                    
                 drain_water(10) # drain water for 10 seconds
+                print("draining completed, initiated loading water ....")
+                
+                print("loading water..")
                 # load_water(50) # load water for 10 seconds
 
                 # Example usage
@@ -235,7 +259,7 @@ def door_control_procedure():
                 write_data_to_shared_memory("command_from_server", 10.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -245,12 +269,14 @@ def door_control_procedure():
         elif command <=10.0:
             try:                    
                 check_and_load_water(13) # load water while reaching the level value less than 13
+                print("water loading completed, drum rotation pattern one initiated...")
+
                 # Example usage
                 update_progress("17348502838715973", 1000, "15")
                 write_data_to_shared_memory("command_from_server", 15.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -262,12 +288,15 @@ def door_control_procedure():
             try:                    
                 send_rpm(8000)
                 drum_rotation_pattern_one()
+                print("drum rotation pattern one completed, water leveling intiialted ..")
+
+
                 # Example usage
                 update_progress("17348502838715973", 1000, "20")
                 write_data_to_shared_memory("command_from_server", 20.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
             time.sleep(1)  # Adjust the delay as needed
 
@@ -278,15 +307,18 @@ def door_control_procedure():
         elif command <=20.0:
             try:                    
                 check_and_load_water(13) # load water while reaching the level value less than 13
+                print("water leveling completed, draining initiated..")
+
                 drain_water(45) # drain water for 10 seconds
-                 # stage 1 completed
+                print("draining completed, initiated loading water ....")   
+    # stage 1 completed
 
                 # Example usage
                 update_progress("17348502838715973", 1000, "39")
                 write_data_to_shared_memory("command_from_server", 39.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -294,16 +326,18 @@ def door_control_procedure():
         elif command <=39.0:
             try:                    
                 # stage 2
+                print("loading water..")
                 # load_water(120) # load water for 10 seconds
 
                 check_and_load_water(13) # load water while reaching the level value less than 13
+                print("water loading completed, drum rotation pattern one initiated...")
 
                 # Example usage
                 update_progress("17348502838715973", 1000, "68")
                 write_data_to_shared_memory("command_from_server", 68.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -312,13 +346,15 @@ def door_control_procedure():
             try:                    
                 send_rpm(8000)
                 drum_rotation_pattern_two()
+                print("drum rotation pattern one completed, water leveling intiialted ..")
+
 
                 # Example usage
                 update_progress("17348502838715973", 1000, "80")
                 write_data_to_shared_memory("command_from_server", 80.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -327,13 +363,14 @@ def door_control_procedure():
             try:                    
                 
                 check_and_load_water(13) # load water while reaching the level value less than 13
+                print("water leveling completed, draining initiated..")
 
                 # Example usage
                 update_progress("17348502838715973", 1000, "90")
                 write_data_to_shared_memory("command_from_server", 90.0)
 
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
 
 
@@ -343,13 +380,15 @@ def door_control_procedure():
             try:                    
 
                 drain_water(45) # drain water for 10 seconds
+                print("draining completed, initiated loading water ....")   
+
 
                 # Example usage
                 update_progress("17348502838715973", 1000, "99")
                 write_data_to_shared_memory("command_from_server", 99.0)
  
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
             time.sleep(1)  # Adjust the delay as needed
 
@@ -366,18 +405,18 @@ def door_control_procedure():
                 write_data_to_shared_memory("command_from_server", 1000.0)
                 cycle_end()
             except Exception as e:
-                dummy =1
+                print(f"Error during door control procedure: {e}")
             
             time.sleep(1)  # Adjust the delay as needed
 
         else:
-            dummy =1
+            print("waiting for command from server...")
 
 
 
 def exit_handler():
     """Set all relay pins to HIGH state on exit."""
-    dummy =1
+    print("before exit...")
     write_data_to_shared_memory("relay_command", 14.0)
 
 

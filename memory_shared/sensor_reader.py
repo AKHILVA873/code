@@ -39,14 +39,17 @@ if __name__ == "__main__":
             # Read water level sensor PWM frequency
             frequency = read_pwm_frequency()
             write_data_to_shared_memory("Pressure", frequency)
+            print(f"Pressure: {frequency:.2f} Hz")
 
             # Example conversion of frequency to water level (adjust based on calibration)
             water_level_value = frequency * 0.1  # Example conversion factor, adjust as needed
             write_data_to_shared_memory("Water_Level", water_level_value)
+            print(f"Water Level: {water_level_value:.2f} units")
 
             # Read door status
             door_status_value = GPIO.input(door_status)
             write_data_to_shared_memory("Door_Status", float(door_status_value))
+            print(f"Door Status: {'Open' if door_status_value == GPIO.LOW else 'Closed'}")
 
             time.sleep(0.5)  # Delay between readings
     except KeyboardInterrupt:
