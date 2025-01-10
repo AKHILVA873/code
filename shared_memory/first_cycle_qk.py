@@ -353,8 +353,8 @@ def door_control_procedure():
             
 
 
-
-
+#hello
+            i=1
         elif command <=99.0:
             try:                    
                 open_door()
