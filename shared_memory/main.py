@@ -83,6 +83,6 @@ if __name__ == "__main__":
     # Check if running interactively or as a service
     if os.isatty(sys.stdin.fileno()):
         interactive_mode()
-    # else:
-    #     service_mode()
+    else:
+        service_mode()
     
