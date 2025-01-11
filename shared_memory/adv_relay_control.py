@@ -117,6 +117,7 @@ if __name__ == "__main__":
             command_value = read_data_from_shared_memory("relay_command")
             command = command_map.get(command_value, None)
             if command:
+                print("command: ", command)
                 command()
             else:
                 print(f"Unknown command value received: {command_value}")
