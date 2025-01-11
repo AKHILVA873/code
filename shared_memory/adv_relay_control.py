@@ -76,7 +76,7 @@ def doorHCommand():
     pi.write(door, pigpio.HIGH)
     time.sleep(0.1)
     pi.write(door, pigpio.LOW)
-    write_data_to_shared_memory("relay_command", float(13.0))
+    write_data_to_shared_memory("relay_command", 13.0)
 
 def doorLCommand():
     pi.write(door, pigpio.LOW)
@@ -91,7 +91,7 @@ def exit_handler():
     pi.write(inlet1, pigpio.LOW)
     pi.write(drain, pigpio.LOW)
     pi.write(door, pigpio.LOW)
-    write_data_to_shared_memory("relay_command", float(0.0))
+    write_data_to_shared_memory("relay_command", 0.0)
 
 
 if __name__ == "__main__":
