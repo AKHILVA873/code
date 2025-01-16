@@ -1,32 +1,63 @@
-import redis
+import mmap
+import posix_ipc
 import struct
 
-# Connect to Redis (make sure Redis server is running)
-r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=False)
+# A dictionary to store shared memory objects
+shared_memory_objects = {}
 
 def create_shared_memory(name, size):
-    # Redis handles dynamic storage, so no explicit size is needed
-    if not r.exists(name):  # Check if the key exists
-        r.set(name, struct.pack('f', 0.0))  # Initialize with a default value
-    return r
+    """
+    Create shared memory object for the given name and size (in bytes).
+    If the shared memory already exists, open it; otherwise, create it.
+    """
+    try:
+        # If shared memory does not exist, create it
+        shm = posix_ipc.SharedMemory(name, flags=posix_ipc.O_CREX, size=size)
+        shared_memory_objects[name] = shm
+    except posix_ipc.ExistentialError:
+        # If it exists, just open it
+        shm = posix_ipc.SharedMemory(name)
+    
+    return shm
 
 def write_data_to_shared_memory(name, data):
-    # Write data to Redis, pack as a float using struct
+    """
+    Write data to shared memory using the given name.
+    Data will be packed into bytes before writing.
+    """
+    # Get the shared memory object by name
+    shm = shared_memory_objects.get(name)
+    if not shm:
+        # If the shared memory object is not already created, create it
+        shm = create_shared_memory(name, 4)
+
     byte_data = struct.pack('f', data)
-    r.set(name, byte_data)
+    with mmap.mmap(shm.fd, shm.size) as mem:
+        mem.seek(0)  # Seek to the start of shared memory
+        mem.write(byte_data)
 
 def read_data_from_shared_memory(name):
-    # Read the byte data from Redis and unpack it
-    byte_data = r.get(name)
-    if byte_data:
+    """
+    Read data from shared memory using the given name.
+    It assumes the data is packed as a float.
+    """
+    # Get the shared memory object by name
+    shm = shared_memory_objects.get(name)
+    if not shm:
+        # If the shared memory object is not already created, create it
+        shm = create_shared_memory(name, 4)
+
+    with mmap.mmap(shm.fd, shm.size) as mem:
+        mem.seek(0)  # Seek to the start of shared memory
+        byte_data = mem.read(4)
         data = struct.unpack('f', byte_data)[0]
         return data
-    else:
-        return None  # Return None if the key does not exist
 
 def modify_shared_memory(name, modify_func):
-    # Read current value, apply modify_func, and save the updated value
+    """
+    Read current value from shared memory, modify it using the provided function,
+    and write it back to shared memory.
+    """
     current_data = read_data_from_shared_memory(name)
-    if current_data is not None:
-        modified_data = modify_func(current_data)
-        write_data_to_shared_memory(name, modified_data)
+    modified_data = modify_func(current_data)
+    write_data_to_shared_memory(name, modified_data)
