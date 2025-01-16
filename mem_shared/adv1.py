@@ -88,7 +88,7 @@ def doorHCommand():
     pi.write(door, pigpio.LOW)
     time.sleep(0.1)
     pi.write(door, pigpio.HIGH)
-    write_data_to_shared_memory("relay_command", float(13.0))
+    write_data_to_shared_memory("relay_command", 13.0)
 
 def doorLCommand():
     print("door closed")
